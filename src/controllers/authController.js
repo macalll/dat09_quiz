@@ -35,7 +35,7 @@ const login = async (req, res) => {
     try {
         const { email, password } = req.body;
 
-        // Kiểm tra xem người dùng có tồn tại không
+        // Kiểm tra người dùng có tồn tại không
         const user = await User.findOne({ where: { email } });
         if (!user) return res.status(404).json({ message: "Người dùng không tồn tại" });
 
@@ -44,9 +44,24 @@ const login = async (req, res) => {
         if (!isMatch) return res.status(400).json({ message: "Mật khẩu không đúng" });
 
         // Tạo token JWT
-        const token = jwt.sign({ id: user.user_id, role: user.role }, "your_secret_key", { expiresIn: "1h" });
+        const token = jwt.sign(
+            { id: user.user_id, role: user.role },
+            "your_secret_key",
+            { expiresIn: "1h" }
+        );
 
-        res.json({ message: "Đăng nhập thành công", token });
+        // Trả về đầy đủ thông tin người dùng
+        res.json({
+            message: "Đăng nhập thành công",
+            user: {
+                username: user.username,
+                email: user.email,
+                password: user.password,  // Trả về password đã mã hóa
+                role: user.role
+            },
+            token
+        });
+
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Lỗi máy chủ", error });
