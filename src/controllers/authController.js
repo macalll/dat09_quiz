@@ -56,7 +56,6 @@ const login = async (req, res) => {
             user: {
                 username: user.username,
                 email: user.email,
-                password: user.password,  // Trả về password đã mã hóa
                 role: user.role
             },
             token
