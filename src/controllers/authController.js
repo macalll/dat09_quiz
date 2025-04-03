@@ -67,4 +67,32 @@ const login = async (req, res) => {
     }
 };
 
-module.exports = { register, login };
+const updateUser = async (req, res) => {
+    try {
+        const { username, email, password } = req.body;
+        const userId = req.user.id; // Lấy ID từ token đã xác thực
+
+        // Tìm người dùng theo ID
+        const user = await User.findByPk(userId);
+        if (!user) return res.status(404).json({ message: "Người dùng không tồn tại" });
+
+        // Cập nhật thông tin nếu có
+        if (username) user.username = username;
+        if (email) user.email = email;
+        if (password) {
+            const salt = await bcrypt.genSalt(10);
+            user.password = await bcrypt.hash(password, salt);
+        }
+
+        // Lưu thay đổi
+        await user.save();
+
+        res.json({ message: "Cập nhật thông tin thành công", user });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Lỗi máy chủ", error });
+    }
+};
+
+module.exports = { register, login, updateUser };
